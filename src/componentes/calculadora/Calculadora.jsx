@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { tema } from '../../estilos/tema';
 
@@ -79,27 +79,6 @@ const Boton = styled.button`
 `;
 
 export const Calculadora = () => {
-  const [operacion, setOperacion] = useState('');
-  const [resultado, setResultado] = useState('0');
-
-  const manejarClick = (valor) => {
-    if (valor === '=') {
-      try {
-        setResultado(eval(operacion).toString());
-        setOperacion('');
-      } catch (error) {
-        setResultado('Error');
-      }
-    } else if (valor === 'C') {
-      setOperacion('');
-      setResultado('0');
-    } else if (valor === '←') {
-      setOperacion(prev => prev.slice(0, -1));
-    } else {
-      setOperacion(prev => prev + valor);
-    }
-  };
-
   const botones = [
     { valor: 'C', especial: true },
     { valor: '+/-', operador: true },
@@ -125,14 +104,13 @@ export const Calculadora = () => {
   return (
     <ContenedorCalculadora>
       <Pantalla>
-        <Operacion>{operacion}</Operacion>
-        <Resultado>{resultado}</Resultado>
+        <Operacion>0</Operacion>
+        <Resultado>0</Resultado>
       </Pantalla>
       <Teclado>
         {botones.map((boton, index) => (
           <Boton
             key={index}
-            onClick={() => manejarClick(boton.valor)}
             operador={boton.operador}
             igual={boton.igual}
             especial={boton.especial}

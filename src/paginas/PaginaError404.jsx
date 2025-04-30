@@ -37,14 +37,14 @@ const Contenedor = styled.div`
   text-align: center;
 `;
 
-const Astronauta = styled.div`
+const Capibara = styled.div`
   font-size: 15rem;
   animation: ${flotar} 3s ease-in-out infinite;
   margin-bottom: 2rem;
   position: relative;
 
   &::after {
-    content: '👨‍🚀';
+    content: '🦫';
   }
 `;
 
@@ -107,18 +107,17 @@ export const PaginaError404 = () => {
 
   return (
     <Contenedor>
-      <Astronauta>
+      <Capibara>
         <Estrellas />
         <Estrellas />
         <Estrellas />
-      </Astronauta>
-      <Titulo>¡Houston, tenemos un problema!</Titulo>
+      </Capibara>
+      <Titulo>¡Ups, tenemos un problema!</Titulo>
       <Subtitulo>
-        Parece que te has aventurado demasiado lejos en el espacio. 
-        Esta página no existe en nuestro universo.
+        Da la vuelta oeeee.
       </Subtitulo>
       <Boton onClick={() => navigate('/')}>
-        Volver a la Tierra
+        Volver al inicio
       </Boton>
     </Contenedor>
   );
