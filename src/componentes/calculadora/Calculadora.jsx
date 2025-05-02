@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { tema } from '../../estilos/tema';
 
@@ -31,8 +31,15 @@ const Operacion = styled.div`
 
 const Resultado = styled.div`
   color: ${tema.colores.texto};
-  font-size: 3rem;
+  font-size: ${props => props.fontSize || '3rem'};
   font-weight: 500;
+  word-break: break-all;
+  overflow: hidden;
+  max-width: 100%;
+  min-height: 3.6rem;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 const Teclado = styled.div`
@@ -79,6 +86,11 @@ const Boton = styled.button`
 `;
 
 export const Calculadora = () => {
+  const [operacion, setOperacion] = useState('');
+  const [resultado, setResultado] = useState('0');
+  const [ultimoOperador, setUltimoOperador] = useState('');
+  const [esperandoOperando, setEsperandoOperando] = useState(false);
+
   const botones = [
     { valor: 'C', especial: true },
     { valor: '+/-', operador: true },
@@ -101,11 +113,142 @@ export const Calculadora = () => {
     { valor: '=', igual: true },
   ];
 
+  const limpiar = () => {
+    setOperacion('');
+    setResultado('0');
+    setUltimoOperador('');
+    setEsperandoOperando(false);
+  };
+
+  const manejarNumero = (numero) => {
+    if (esperandoOperando) {
+      setResultado(numero);
+      setEsperandoOperando(false);
+    } else {
+      setResultado(prev => prev === '0' ? numero : prev + numero);
+    }
+  };
+
+  const manejarPunto = () => {
+    if (esperandoOperando) {
+      setResultado('0.');
+      setEsperandoOperando(false);
+    } else if (!resultado.includes('.')) {
+      setResultado(prev => prev + '.');
+    }
+  };
+
+  const manejarOperador = (operador) => {
+    const valorActual = parseFloat(resultado);
+    
+    if (operacion === '') {
+      setOperacion(`${resultado} ${operador}`);
+      setUltimoOperador(operador);
+      setEsperandoOperando(true);
+      return;
+    }
+
+    if (esperandoOperando) {
+      setOperacion(prev => prev.slice(0, -1) + operador);
+      setUltimoOperador(operador);
+      return;
+    }
+
+    const resultadoAnterior = parseFloat(operacion.split(' ')[0]);
+    let nuevoResultado;
+
+    switch (ultimoOperador) {
+      case '+':
+        nuevoResultado = resultadoAnterior + valorActual;
+        break;
+      case '-':
+        nuevoResultado = resultadoAnterior - valorActual;
+        break;
+      case '×':
+        nuevoResultado = resultadoAnterior * valorActual;
+        break;
+      case '÷':
+        nuevoResultado = resultadoAnterior / valorActual;
+        break;
+      case '%':
+        nuevoResultado = resultadoAnterior % valorActual;
+        break;
+      default:
+        nuevoResultado = valorActual;
+    }
+
+    setOperacion(`${nuevoResultado} ${operador}`);
+    setResultado(nuevoResultado.toString());
+    setUltimoOperador(operador);
+    setEsperandoOperando(true);
+  };
+
+  const manejarIgual = () => {
+    if (operacion === '' || esperandoOperando) return;
+
+    const valorActual = parseFloat(resultado);
+    const resultadoAnterior = parseFloat(operacion.split(' ')[0]);
+    let nuevoResultado;
+
+    switch (ultimoOperador) {
+      case '+':
+        nuevoResultado = resultadoAnterior + valorActual;
+        break;
+      case '-':
+        nuevoResultado = resultadoAnterior - valorActual;
+        break;
+      case '×':
+        nuevoResultado = resultadoAnterior * valorActual;
+        break;
+      case '÷':
+        nuevoResultado = resultadoAnterior / valorActual;
+        break;
+      case '%':
+        nuevoResultado = resultadoAnterior % valorActual;
+        break;
+      default:
+        nuevoResultado = valorActual;
+    }
+
+    setOperacion('');
+    setResultado(nuevoResultado.toString());
+    setUltimoOperador('');
+    setEsperandoOperando(false);
+  };
+
+  const manejarSigno = () => {
+    setResultado(prev => (parseFloat(prev) * -1).toString());
+  };
+
+  const manejarClick = (valor) => {
+    if (valor === 'C') {
+      limpiar();
+    } else if (valor === '+/-') {
+      manejarSigno();
+    } else if (valor === '=') {
+      manejarIgual();
+    } else if (valor === '.') {
+      manejarPunto();
+    } else if (['+', '-', '×', '÷', '%'].includes(valor)) {
+      manejarOperador(valor);
+    } else {
+      manejarNumero(valor);
+    }
+  };
+
+  // Ajustar el tamaño de fuente según la longitud del resultado
+  const calcularFontSize = (valor) => {
+    if (valor.length > 18) return '1.3rem';
+    if (valor.length > 14) return '1.7rem';
+    if (valor.length > 10) return '2.2rem';
+    return '3rem';
+  };
+
   return (
     <ContenedorCalculadora>
       <Pantalla>
-        <Operacion>0</Operacion>
-        <Resultado>0</Resultado>
+        <Operacion>{operacion}</Operacion>
+        <Resultado fontSize={calcularFontSize(resultado)}>{resultado}</Resultado>
       </Pantalla>
       <Teclado>
         {botones.map((boton, index) => (
@@ -115,6 +258,7 @@ export const Calculadora = () => {
             igual={boton.igual}
             especial={boton.especial}
             span={boton.span}
+            onClick={() => manejarClick(boton.valor)}
           >
             {boton.valor}
           </Boton>
